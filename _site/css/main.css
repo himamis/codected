@@ -43,7 +43,7 @@ a:hover {
   text-decoration: underline; }
 
 header {
-  background: #FF2400;
+  background: #FFFFFF;
   padding: 0px 15px;
   text-align: center;
   margin: 50px 0 0;
@@ -94,7 +94,7 @@ aside {
           margin-bottom: -1px;
           box-shadow: 0; }
           aside nav ul li a:hover, aside nav ul li a:active {
-            background: #FF2400;
+            background: #FFFFFF;
             text-decoration: none;
             color: #19CCAA; }
     aside nav:after {
