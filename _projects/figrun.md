@@ -2,22 +2,23 @@
 layout: page
 title: FigRun
 description: FigRun - Your Ultimate Running Companion
-img: assets/img/figrun.png
+img: assets/img/figrun_project.png
 importance: 1
 category: app
 ---
 Stay ahead of the weather and make your runs more comfortable with FigRun! Our app gives you real-time weather updates and personalized gear recommendations so you can focus on what matters most – your run.
 
 ## Key Features
-#### ✅ Real-Time Weather Updates
+
+#### Real-Time Weather Updates
 
 FigRun uses your current location to provide accurate, up-to-the-minute weather information. Whether it's sunny, rainy, or snowy, you'll always know what to expect before you step outside.
 
-#### ✅ Personalized Gear Recommendations
+#### Personalized Gear Recommendations
 
 Get customized suggestions for what to wear based on the current weather conditions. From shorts and singlets for hot days to heavy jackets and gloves for winter runs, we've got you covered.
 
-#### ✅ Animated Stick Figure
+#### Animated Stick Figure
 
 Visualize your recommended gear on our animated stick figure. See exactly what to wear and how you'll look before you head out.
 
