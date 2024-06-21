@@ -8,8 +8,6 @@ category: app
 ---
 Stay ahead of the weather and make your runs more comfortable with FigRun! Our app gives you real-time weather updates and personalized gear recommendations so you can focus on what matters most – your run.
 
-## Key Features
-
 #### Real-Time Weather Updates
 
 FigRun uses your current location to provide accurate, up-to-the-minute weather information. Whether it's sunny, rainy, or snowy, you'll always know what to expect before you step outside.
@@ -27,3 +25,8 @@ Get the Weather: FigRun fetches real-time weather data based on your location.
 Receive Gear Suggestions: Our algorithm analyzes the weather and suggests the best gear for your run.
 See the Animation: Watch our stick figure model the recommended gear, so you know what to wear.
 
+***
+
+[Privacy Policy]({{ site.baseurl }}{% link _pages/figrun_privacy_policy.md %})
+
+[Terms & Conditions]({{ site.baseurl }}{% link _pages/figrun_terms_conditions.md %})
