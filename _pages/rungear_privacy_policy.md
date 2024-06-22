@@ -1,12 +1,12 @@
 ---
 layout: page
-title: FigRun - Privacy Policy
-permalink: /projects/figrun/privacy
+title: Rungear - Privacy Policy
+permalink: /projects/rungear/privacy
 nav: false
 ---
 **Privacy Policy**
 
-This privacy policy is applicable to the FigRun app (hereinafter referred to as "Application") for mobile devices, which was developed by Codected Solutions SRL (hereinafter referred to as "Service Provider") as a an Ad Supported service. This service is provided "AS IS".
+This privacy policy is applicable to the Rungear app (hereinafter referred to as "Application") for mobile devices, which was developed by Codected Solutions SRL (hereinafter referred to as "Service Provider") as a an Ad Supported service. This service is provided "AS IS".
 
 **What information does the Application obtain and how is it used?**  
 **User Provided Information**
