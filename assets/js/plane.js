@@ -8,9 +8,18 @@ const S_MIN = 6;
 const S_MAX = 400;
 const CARD_HIDE_K = 0.42; // below this card scale, cards fade out and only pins remain
 const CARD_FULL_K = 0.54;
+// Cards stop growing past this scale (they behave like map popups when you zoom in). Unbounded
+// scale(k) made iOS Safari back each glowing card with a texture up to ~10x its size → tab crash.
+const CARD_MAX_K = 1.4;
 const CAMERA_LIMIT = 600; // world units; the plane is infinite, your patience is not
 const CURVE_FRAME_BUDGET = 40000; // function evaluations per frame, shared by all curves
 const DPR_CAP = 2;
+// Phones/tablets ("lite": set on <html> by an inline script for coarse pointers): the canvas is the
+// biggest GPU fill cost, so it renders at a lower backing resolution, with cheaper glow, and at 30fps
+// while nothing moves (the ambient sine wave doesn't need 60). Any interaction goes straight back to 60.
+const LITE = typeof document !== 'undefined' && document.documentElement.classList.contains('is-lite');
+const LITE_DPR_CAP = 1.5;
+const dprCap = () => (LITE ? LITE_DPR_CAP : DPR_CAP);
 const TAU = Math.PI * 2;
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -306,6 +315,7 @@ export class Plane {
   }
 
   get k() { return this.camera.s / REF_SCALE; }
+  get cardK() { return Math.min(this.k, CARD_MAX_K); } // the scale cards are actually drawn at
 
   addObject(obj) {
     if (!obj) return null;
@@ -448,7 +458,7 @@ export class Plane {
     const r = this.canvas.getBoundingClientRect();
     const W = Math.max(1, Math.round(r.width) || window.innerWidth);
     const H = Math.max(1, Math.round(r.height) || window.innerHeight);
-    const dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    const dpr = Math.min(dprCap(), window.devicePixelRatio || 1);
     const sizeChanged = W !== this.W || H !== this.H;
     if (sizeChanged || dpr !== this.dpr) {
       this.W = W; this.H = H; this.dpr = dpr;
@@ -858,7 +868,7 @@ export class Plane {
       this.worldEl.scrollTop = this.worldEl.scrollLeft = 0;
       const p = this.placeById(id);
       const c = this._cards.get(id);
-      const k = this.k;
+      const k = this.cardK;
       const a = this.worldToScreen(p.x, p.y + 1); // card anchor: bottom centre
       const w = (c?.w || card.offsetWidth) * k, h = (c?.h || card.offsetHeight) * k;
       const f = this._free;
@@ -1188,7 +1198,13 @@ export class Plane {
   _onGesture(e, phase) {
     if (this._pointers.size) return; // touch pinch is handled by pointer events
     const t = e.target instanceof Element ? e.target : null;
-    if (!this._inWorld(t)) return;
+    if (!this._inWorld(t)) {
+      // iOS: a pinch that starts on the HUD would zoom the whole page (fixed layers and all), which is
+      // both confusing and a memory spike. Block it, except in the boring document and the 3D view,
+      // where pinch-zoom is legit (accessibility / OrbitControls).
+      if (!t?.closest?.('#boring, #modal-3d')) e.preventDefault();
+      return;
+    }
     e.preventDefault();
     if (phase === 'start') { this._gscale = 1; this._cancelFlight(); this._userMove(); return; }
     if (phase === 'change' && this._gscale) {
@@ -1310,7 +1326,7 @@ export class Plane {
     if (this._frame % 30 === 1) {
       this._measureHud();
       // belt and braces for the DPR watcher: some browsers move a window between screens without telling anyone
-      if (Math.min(DPR_CAP, window.devicePixelRatio || 1) !== this.dpr) this.resize();
+      if (Math.min(dprCap(), window.devicePixelRatio || 1) !== this.dpr) this.resize();
     }
     if (this._frame % 15 === 2) this._measureEdges();
 
@@ -1318,12 +1334,22 @@ export class Plane {
     this._updateMotion(dt, now);
     if (this.camera.s !== s0) this._lastZoomAt = now;
 
+    // lite: half frame rate while idle (no flight, drag, inertia, zoom, keys, intro)
+    if (LITE && (this._frame & 1) && !this._busy(now)) return;
+
     try {
       this._render(dt);
     } catch (err) {
       if (!this._renderErrorLogged) { console.error('[plane] render failed', err); this._renderErrorLogged = true; }
     }
   };
+
+  _busy(now) {
+    return !!(this._flight || this._glide || this._zoomAnim || this._pointers.size
+      || this._vel.x || this._vel.y || this._keyVel.x || this._keyVel.y
+      || this._intro.done === false || this.clock - Math.max(0, this._intro.start) < 3
+      || (this._lastZoomAt && now - this._lastZoomAt < 300));
+  }
 
   _updateMotion(dt, now) {
     const c = this.camera;
@@ -1586,6 +1612,11 @@ export class Plane {
 
   _glowStroke(ctx, path, rgb, scale = 1, coreAlpha = 1) {
     ctx.globalCompositeOperation = 'lighter';
+    if (LITE) { // two passes instead of four: most of the cost is the wide halo's fill
+      ctx.lineWidth = 7 * scale; ctx.strokeStyle = rgba(rgb, 0.11 * coreAlpha); ctx.stroke(path);
+      ctx.lineWidth = 2 * scale; ctx.strokeStyle = rgba(rgb, 0.95 * coreAlpha); ctx.stroke(path);
+      return;
+    }
     ctx.lineWidth = 11 * scale; ctx.strokeStyle = rgba(rgb, 0.055 * coreAlpha); ctx.stroke(path);
     ctx.lineWidth = 4.6 * scale; ctx.strokeStyle = rgba(rgb, 0.17 * coreAlpha); ctx.stroke(path);
     ctx.lineWidth = 2 * scale; ctx.strokeStyle = rgba(rgb, 0.95 * coreAlpha); ctx.stroke(path);
@@ -1987,7 +2018,7 @@ export class Plane {
 
   _updateCards() {
     if (!this._cards.size) return;
-    const k = this.k;
+    const k = this.cardK;
     const dpr = this.dpr;
     const op = smoothstep(CARD_HIDE_K, CARD_FULL_K, k);
     const zooming = performance.now() - this._lastZoomAt < 200;
@@ -2002,7 +2033,9 @@ export class Plane {
       const sp = this.worldToScreen(p.x, p.y + 1);
       const x = Math.round((sp.x + this._ox) * dpr) / dpr;
       const y = Math.round((sp.y + this._oy) * dpr) / dpr;
-      const tf = `translate3d(${x}px,${y}px,0) translate(-50%,-100%) scale(${kk.toFixed(4)})`;
+      // …and never wider than the screen: a card is a popup, not a billboard (and smaller = less GPU memory)
+      const ck = c.w ? Math.min(kk, (this.W - 24) / c.w) : kk;
+      const tf = `translate3d(${x}px,${y}px,0) translate(-50%,-100%) scale(${ck.toFixed(4)})`;
       if (tf !== c.tf) { c.el.style.transform = tf; c.tf = tf; }
       // cards arrive just after their pins drop in
       const reveal = this.reducedMotion ? 1 : smoothstep(0.5, 1.0, introT - this.places.indexOf(p) * 0.06);
@@ -2016,10 +2049,10 @@ export class Plane {
       }
       if (zooming !== c.wc) { c.el.style.willChange = zooming ? 'transform' : ''; c.wc = zooming; }
       if (o > 0.5 && c.w) {
-        const l = sp.x - (c.w * k) / 2, t = sp.y - c.h * k;
-        if (l < this.W && l + c.w * k > 0 && t < this.H && sp.y > 0) rects.push({ id: `card-${id}`, left: l, top: t, right: l + c.w * k, bottom: sp.y });
+        const l = sp.x - (c.w * ck) / 2, t = sp.y - c.h * ck;
+        if (l < this.W && l + c.w * ck > 0 && t < this.H && sp.y > 0) rects.push({ id: `card-${id}`, left: l, top: t, right: l + c.w * ck, bottom: sp.y });
       }
-      const cy = sp.y - (c.h * k) / 2;
+      const cy = sp.y - (c.h * ck) / 2;
       const d = Math.hypot(sp.x - cxs, cy - cys);
       if (d < nd) { nd = d; nearest = id; }
     }
