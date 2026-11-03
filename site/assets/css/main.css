@@ -174,8 +174,7 @@ code { font-family: var(--font-mono); font-size: .9em; }
   width: 90vmax;
   height: 90vmax;
   border-radius: 50%;
-  filter: blur(40px);
-  will-change: transform;
+  will-change: transform; /* no blur filter: the radial gradients already fade out, a blur here only cost GPU */
 }
 #aurora i:nth-child(1) {
   left: -30vmax; top: -40vmax;
@@ -1533,7 +1532,11 @@ code { font-family: var(--font-mono); font-size: .9em; }
     mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 18px), transparent 100%);
   }
   #places::-webkit-scrollbar { display: none; }
-  .place-btn { flex: none; height: 36px; padding: 0 12px; font-size: 12.5px; scroll-snap-align: center; }
+  .place-btn { flex: none; height: 34px; padding: 0 12px; font-size: 12.5px; scroll-snap-align: center; }
+  /* the nav scrolls sideways, which also clips vertically: keep the visible pill (and its selection ring)
+     inside the strip, and grow the tap area invisibly to the strip's full height instead */
+  #places .place-btn { min-height: 34px; }
+  .place-btn::before { content: ""; position: absolute; inset: -4px 0; }
   .place-btn[aria-current="true"]::after, .place-btn[aria-current="location"]::after, .place-btn.is-active::after { bottom: 2px; left: 16px; right: 16px; height: 1.5px; }
 }
 @media (min-width: 641px) and (max-width: 780px) {
@@ -1694,3 +1697,37 @@ html.no-boot #boring[hidden] { display: block !important; }
   .card-inner, #algebra, #hud-top > *, .toast { border: 1px solid CanvasText; }
   .wordmark-text, .brand-word { color: CanvasText; -webkit-text-fill-color: CanvasText; background: none; filter: none; }
 }
+
+/* ==========================================================================
+   Lite mode (html.is-lite = coarse pointer: phones, tablets)
+   Profiling showed the lag is GPU/compositor work, not JS: the animated, blended aurora, big card
+   shadows re-rasterized while cards move, backdrop blur over a canvas that changes every frame, and
+   stacked filters on the wordmark. Phones get the same look built from cheap, opaque layers.
+   ========================================================================== */
+.is-lite #aurora { mix-blend-mode: normal; opacity: .75; }
+.is-lite #aurora i { animation: none !important; will-change: auto; }
+.is-lite .card-inner,
+.is-lite .hud-glass, .is-lite #hud-top > *, .is-lite #algebra, .is-lite .minimap-frame,
+.is-lite .zoom, .is-lite #coords, .is-lite .toast, .is-lite #modal-3d {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.is-lite .card-inner {
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--pc) 9%, transparent), transparent 60%),
+    linear-gradient(180deg, rgba(16, 19, 34, .94), rgba(8, 10, 18, .92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 0 0 1px color-mix(in srgb, var(--pc) 14%, transparent);
+  transition: transform .9s var(--ease-spring), opacity .6s var(--ease-out);
+}
+.is-lite .card-inner::before { box-shadow: 0 0 8px var(--pc); }
+.is-lite .card-inner::after { box-shadow: none; }
+.is-lite #algebra { background: rgba(10, 12, 22, .95); box-shadow: 0 -1px 0 rgba(255, 255, 255, .05); }
+.is-lite .toast { box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent); }
+.is-lite #modal-3d { background: rgba(3, 4, 8, .9); }
+.is-lite .wordmark-text {
+  filter: drop-shadow(0 0 12px rgba(61, 245, 255, .4));
+  animation: none;
+}
+.is-lite .wordmark-text::before { display: none; }
+.is-lite .portrait::before { animation: none; box-shadow: 0 0 12px rgba(61, 245, 255, .35); filter: none; }
+.is-lite .live-dot { animation: none; }

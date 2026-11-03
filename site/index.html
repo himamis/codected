@@ -29,6 +29,8 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
 
   <!-- three.js is only fetched when the 3D view opens. The map must come before any module script. -->
+  <!-- phones/tablets get "lite" mode: same look, far less GPU work (see main.css "Lite mode") -->
+  <script>if (matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('is-lite');</script>
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
 
   <link rel="preload" href="/assets/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
