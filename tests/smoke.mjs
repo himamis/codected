@@ -85,13 +85,14 @@ async function suite(label, contextOpts) {
     assert(res.ok(), `GET / → ${res.status()}`);
     await page.waitForFunction(() => window.codected && document.querySelectorAll('#algebra-list li').length >= 6, null, { timeout: 8000 });
     await page.waitForFunction(() => +getComputedStyle(document.querySelector('#card-hello')).opacity > 0.9, null, { timeout: 8000 });
-    const painted = await page.evaluate(() => {
+    // slow CI runners can need a few frames before the plane is drawn, so poll instead of sampling once
+    const painted = await page.waitForFunction(() => {
       const c = document.querySelector('#plane');
       const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
       let lit = 0;
       for (let i = 3; i < d.length; i += 4 * 97) if (d[i] > 0) lit++;
-      return lit;
-    });
+      return lit > 50 && lit;
+    }, null, { timeout: 8000, polling: 250 }).then((h) => h.jsonValue(), () => 0);
     assert(painted > 50, 'the canvas looks empty');
     const [sw, iw] = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
     assert(sw <= iw, `horizontal scroll: ${sw} > ${iw}`);
