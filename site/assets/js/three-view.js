@@ -19,8 +19,8 @@ const JUMP = ZCAP * 0.75;
 const WIRE_EVERY = 2;      // N must be a multiple of this so the border lines exist   // neighbouring vertices further apart than this → don't connect (asymptote walls)
 const AXIS_LEN = HALF + 1.6;
 const BG = 0x05060a;
-const STOPS = ['#3df5ff', '#8a7dff', '#ff3df2']; // low → mid → high
-const AXIS_COLORS = { x: '#ff4d6d', y: '#b6ff3d', z: '#3df5ff' };
+const STOPS = ['#5ed6e0', '#8f86e8', '#e06bd6']; // low → mid → high
+const AXIS_COLORS = { x: '#ee6a80', y: '#a8d860', z: '#5ed6e0' };
 
 let lib = null;            // { THREE, OrbitControls, post }
 let libPromise = null;
@@ -201,7 +201,7 @@ function setLoading(host, on) {
     font: '500 13px/1.4 "JetBrains Mono", ui-monospace, monospace',
     color: '#9aa3c7',
     letterSpacing: '.04em',
-    textShadow: '0 0 12px rgba(61,245,255,.45)',
+    textShadow: '0 0 12px rgba(94, 214, 224,.45)',
     pointerEvents: 'none',
   });
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';

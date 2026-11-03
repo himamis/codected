@@ -11,7 +11,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 const COLORS = {
-  cyan: '#3df5ff', violet: '#8a7dff', magenta: '#ff3df2', lime: '#b6ff3d', amber: '#ffb23d', red: '#ff4d6d',
+  cyan: '#5ed6e0', violet: '#8f86e8', magenta: '#e06bd6', lime: '#a8d860', amber: '#f0b056', red: '#ee6a80',
   dim: '#9aa3c7',
 };
 // the colours the defaults already use (route magenta, g violet, f cyan) come last, so new curves stand out
@@ -26,14 +26,12 @@ const shortQuery = matchMedia('(max-height: 480px)'); // landscape phones: every
 const els = {
   canvas: $('#plane'),
   world: $('#world'),
-  minimap: $('#minimap'),
   list: $('#algebra-list'),
   algebra: $('#algebra'),
   algebraToggle: $('#algebra-toggle'),
   algebraCount: $('.algebra-count'),
   form: $('#input-form'),
   input: $('#input'),
-  coords: $('#coords'),
   boring: $('#boring'),
   boringToggle: $('#boring-toggle'),
   boringClose: $('#boring-close'),
@@ -67,7 +65,6 @@ getMath(); getFxMod(); getCommandsMod(); // warm-up
 const plane = new Plane({
   canvas: els.canvas,
   worldEl: els.world,
-  minimapCanvas: els.minimap,
   places: PLACES,
   reducedMotion: reducedMotion(),
 });
@@ -674,7 +671,7 @@ try {
     '%ccodected%c\n%cYou opened the console. Of course you did.\n' +
       'Try: codected.help() · codected.plot("sin(x + t)") · codected.run("party") · codected.fly("mapplic")\n' +
       `Hiring? ${MAIL}`,
-    'font: 800 42px/1.1 "Bricolage Grotesque", system-ui, sans-serif; color: #3df5ff; text-shadow: 0 0 8px #3df5ff, 0 0 22px #8a7dff; letter-spacing: -2px;',
+    'font: 800 42px/1.1 "Bricolage Grotesque", system-ui, sans-serif; color: #5ed6e0; text-shadow: 0 0 8px #5ed6e0, 0 0 22px #8f86e8; letter-spacing: -2px;',
     '',
     'font: 12px/1.6 "JetBrains Mono", ui-monospace, monospace; color: #9aa3c7;',
   );

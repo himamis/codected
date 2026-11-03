@@ -22,13 +22,13 @@
     .plot .c3 { stroke-width: 1.8; }
     .plot .draw { stroke-dasharray: 700; stroke-dashoffset: 700; animation: draw 1.6s cubic-bezier(.6, 0, .2, 1) forwards; }
     .plot .draw.late { animation-delay: 0.9s; }
-    .plot .hole { fill: var(--bg); stroke: var(--cyan); stroke-width: 2; filter: drop-shadow(0 0 4px rgba(61, 245, 255, 0.8)); }
-    .plot .hint { stroke: rgba(255, 61, 242, 0.5); stroke-width: 1.2; stroke-dasharray: 3 5; fill: none; animation: march 1s linear infinite; }
+    .plot .hole { fill: var(--bg); stroke: var(--cyan); stroke-width: 2; filter: drop-shadow(0 0 4px rgba(94, 214, 224, 0.8)); }
+    .plot .hint { stroke: rgba(224, 107, 214, 0.5); stroke-width: 1.2; stroke-dasharray: 3 5; fill: none; animation: march 1s linear infinite; }
     .plot .label { fill: var(--ink-dim); font: 12px var(--mono); }
     .plot .label-you { fill: var(--magenta); }
     .you { cursor: pointer; outline: none; }
-    .you .halo { fill: rgba(255, 61, 242, 0.18); transform-box: fill-box; transform-origin: center; animation: pulse 1.8s ease-out infinite; }
-    .you .dot { fill: var(--magenta); filter: drop-shadow(0 0 6px rgba(255, 61, 242, 0.9)); }
+    .you .halo { fill: rgba(224, 107, 214, 0.18); transform-box: fill-box; transform-origin: center; animation: pulse 1.8s ease-out infinite; }
+    .you .dot { fill: var(--magenta); filter: drop-shadow(0 0 6px rgba(224, 107, 214, 0.9)); }
     .you:focus-visible .dot { stroke: var(--amber); stroke-width: 2; }
     .you-move { transition: transform 0.7s cubic-bezier(.5, -0.4, .3, 1.4); }
     @keyframes draw { to { stroke-dashoffset: 0; } }
@@ -41,7 +41,6 @@
 </head>
 <body>
   <main class="sheet">
-    <p class="eyebrow">Error · HTTP 404</p>
     <h1>404</h1>
     <p class="lede">Point not on curve.</p>
 

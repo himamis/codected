@@ -2,7 +2,7 @@
 // createFx(plane, { reducedMotion }) → { spawnBugs, butterflies, confetti, stopAll, onBugsChanged, squashAll, bugCount }
 // Everything is drawn through plane.addOverlay(draw); counts are capped; finished particles are dropped.
 
-const P = { cyan: '#3df5ff', violet: '#8a7dff', magenta: '#ff3df2', lime: '#b6ff3d', amber: '#ffb23d', red: '#ff4d6d' };
+const P = { cyan: '#5ed6e0', violet: '#8f86e8', magenta: '#e06bd6', lime: '#a8d860', amber: '#f0b056', red: '#ee6a80' };
 const PALETTE = Object.values(P);
 const BUG_COLORS = [P.lime, P.lime, P.red, P.amber, P.magenta, P.cyan];
 const WING_PAIRS = [[P.cyan, P.violet], [P.magenta, P.amber], [P.lime, P.cyan], [P.violet, P.magenta], [P.amber, P.red], [P.cyan, P.magenta]];

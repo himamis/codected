@@ -1,8 +1,8 @@
-// plane.js — the glowing, infinite, pannable coordinate plane that is also a map.
-// A love letter to GeoGebra (grid, axes, curves) and Mapplic (pins, route, minimap).
+// plane.js — the infinite, pannable coordinate plane that is also a map.
+// A love letter to GeoGebra (grid, axes, curves) and Mapplic (pins, route).
 // Zero dependencies. Canvas 2D, layered strokes with 'lighter' compositing instead of shadowBlur.
 
-import { REF_SCALE, PLACES, TOUR, WORLD_BOUNDS } from './content.js';
+import { REF_SCALE, PLACES, TOUR } from './content.js';
 
 const S_MIN = 6;
 const S_MAX = 400;
@@ -207,25 +207,18 @@ export class Plane {
   constructor({
     canvas,
     worldEl,
-    minimapCanvas,
     places = PLACES,
     reducedMotion = false,
     tour = TOUR,
-    bounds = WORLD_BOUNDS,
     edgeArrowsEl = document.getElementById('edge-arrows'),
-    coordsEl = document.getElementById('coords'),
   } = {}) {
     if (!canvas) throw new Error('Plane needs a canvas. It is, after all, a plane.');
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: true });
     this.worldEl = worldEl || null;
-    this.minimapCanvas = minimapCanvas || null;
-    this.mctx = minimapCanvas ? minimapCanvas.getContext('2d') : null;
     this.edgeArrowsEl = edgeArrowsEl || null;
-    this.coordsEl = coordsEl || null;
     this.places = places;
     this.tour = tour.filter((id) => places.some((p) => p.id === id));
-    this.bounds = bounds;
     this.reducedMotion = !!reducedMotion;
 
     this.camera = { x: 0, y: 0, s: REF_SCALE };
@@ -248,7 +241,6 @@ export class Plane {
     // motion state
     this._flight = null;
     this._zoomAnim = null; // { logTarget, ax, ay }
-    this._glide = null; // { x, y } world target (minimap)
     this._vel = { x: 0, y: 0 }; // inertia, screen px/s
     this._keys = new Set();
     this._keyVel = { x: 0, y: 0 };
@@ -468,15 +460,6 @@ export class Plane {
     this._canvasLeft = r.left || 0;
     this._canvasTop = r.top || 0;
     this._readSafeArea();
-    if (this.minimapCanvas) {
-      const m = this.minimapCanvas;
-      const mw = m.clientWidth, mh = m.clientHeight;
-      if (mw && mh && (m.width !== Math.round(mw * dpr) || m.height !== Math.round(mh * dpr))) {
-        m.width = Math.round(mw * dpr);
-        m.height = Math.round(mh * dpr);
-      }
-      this._mmW = mw; this._mmH = mh;
-    }
     this._measureHud();
     this._measureCards();
     // a parked camera follows the viewport (rotation, window resize) so the card stays framed
@@ -593,7 +576,7 @@ export class Plane {
       }
       return { l: cx - hw, r: cx + hw, cx };
     };
-    // the minimap / zoom corner is an obstacle too (phones excluded: there it's a home button above the sheet)
+    // the zoom corner is an obstacle too (phones excluded: there it's a home button above the sheet)
     let fb = f.b;
     const br = this._hud.find((r) => r.id === 'hud-br');
     const sheet = this._hud.some((r) => r.id === 'algebra' && r.side === 'bottom');
@@ -633,7 +616,6 @@ export class Plane {
 
   _zoomSmooth(factor, sx, sy) {
     this._cancelFlight();
-    this._glide = null;
     this._userMove();
     if (this.reducedMotion) {
       this._zoomAbout(sx, sy, this.camera.s * factor);
@@ -658,7 +640,6 @@ export class Plane {
   }
   _stopMotion() {
     this._zoomAnim = null;
-    this._glide = null;
     this._vel.x = this._vel.y = 0;
   }
   _userMove() {
@@ -769,7 +750,7 @@ export class Plane {
       b.tabIndex = -1;
       b.setAttribute('aria-label', `Go to ${p.label}`);
       b.style.setProperty('--c', p.color);
-      b.innerHTML = `<span class="edge-arrow-icon" aria-hidden="true">${ARROW_SVG}</span><span class="edge-arrow-label">${p.label}</span><span class="edge-arrow-dist" aria-hidden="true"></span>`;
+      b.innerHTML = `<span class="edge-arrow-icon" aria-hidden="true">${ARROW_SVG}</span><span class="edge-arrow-label">${p.label}</span>`;
       b.addEventListener('click', (e) => {
         e.preventDefault();
         this.flyToPlace(p.id);
@@ -778,11 +759,10 @@ export class Plane {
       this._edges.set(p.id, {
         el: b,
         icon: b.querySelector('.edge-arrow-icon'),
-        dist: b.querySelector('.edge-arrow-dist'),
         shown: false,
-        w: 40 + p.label.length * 7.2 + 30,
+        w: 40 + p.label.length * 7.2,
         h: 30,
-        tf: '', rot: '', d: '',
+        tf: '', rot: '',
         measured: false,
       });
     }
@@ -798,7 +778,7 @@ export class Plane {
 :where(.edge-arrow-icon) svg { width: 13px; height: 13px; display: block; }
 :where(.edge-arrow-icon) svg path { fill: currentColor; }
 .edge-arrow.is-compact { width: 32px; height: 32px; padding: 0; gap: 0; justify-content: center; }
-.edge-arrow.is-compact .edge-arrow-label, .edge-arrow.is-compact .edge-arrow-dist { display: none; }
+.edge-arrow.is-compact .edge-arrow-label { display: none; }
 `;
     const el = document.createElement('style');
     el.dataset.owner = 'plane.js';
@@ -895,42 +875,6 @@ export class Plane {
       if (t.closest('#zoom-out')) { this.zoomBy(1 / 1.6); return; }
     });
 
-    // minimap
-    if (this.minimapCanvas) {
-      const mm = this.minimapCanvas;
-      mm.style.touchAction = 'none';
-      let dragging = false;
-      const toWorld = (e) => {
-        const r = mm.getBoundingClientRect();
-        const m = this._minimapMap();
-        if (!m) return null;
-        return { x: (e.clientX - r.left - m.ox) / m.k + this.bounds.minX, y: this.bounds.maxY - (e.clientY - r.top - m.oy) / m.k };
-      };
-      listen(mm, 'pointerdown', (e) => {
-        if (e.button !== 0 && e.pointerType === 'mouse') return;
-        e.preventDefault();
-        const w = toWorld(e);
-        if (!w) return;
-        dragging = true;
-        try { mm.setPointerCapture(e.pointerId); } catch { /* fine */ }
-        this._cancelFlight();
-        this._zoomAnim = null;
-        this._vel.x = this._vel.y = 0;
-        this._userMove();
-        this._glide = { x: w.x, y: w.y };
-        this._requestFrame();
-      });
-      listen(mm, 'pointermove', (e) => {
-        if (!dragging) return;
-        const w = toWorld(e);
-        if (w) this._glide = { x: w.x, y: w.y };
-      });
-      const end = () => { dragging = false; };
-      listen(mm, 'pointerup', end);
-      listen(mm, 'pointercancel', end);
-      listen(mm, 'lostpointercapture', end);
-    }
-
     // pause in boring mode
     if ('MutationObserver' in window) {
       this._mo = new MutationObserver(() => this._setPaused(document.body.classList.contains('is-boring'), 'boring'));
@@ -939,7 +883,6 @@ export class Plane {
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver(() => this.resize());
       ro.observe(this.canvas);
-      if (this.minimapCanvas) ro.observe(this.minimapCanvas);
       for (const id of ['hud-top', 'algebra']) {
         const el = document.getElementById(id);
         if (el) ro.observe(el);
@@ -982,7 +925,6 @@ export class Plane {
     // grabbing a moving map stops it
     this._vel.x = this._vel.y = 0;
     this._zoomAnim = null;
-    this._glide = null;
     if (e.pointerType === 'mouse' && e.button === 1) e.preventDefault();
 
     if (this._pointers.size === 1) {
@@ -1165,7 +1107,6 @@ export class Plane {
     e.preventDefault();
     this._cancelFlight();
     this._vel.x = this._vel.y = 0;
-    this._glide = null;
     this._userMove();
 
     let dx = e.deltaX, dy = e.deltaY;
@@ -1236,7 +1177,6 @@ export class Plane {
       if (!this._keys.has(key)) {
         this._cancelFlight();
         this._zoomAnim = null;
-        this._glide = null;
         this._userMove();
       }
       this._keys.add(key);
@@ -1345,7 +1285,7 @@ export class Plane {
   };
 
   _busy(now) {
-    return !!(this._flight || this._glide || this._zoomAnim || this._pointers.size
+    return !!(this._flight || this._zoomAnim || this._pointers.size
       || this._vel.x || this._vel.y || this._keyVel.x || this._keyVel.y
       || this._intro.done === false || this.clock - Math.max(0, this._intro.start) < 3
       || (this._lastZoomAt && now - this._lastZoomAt < 300));
@@ -1389,14 +1329,6 @@ export class Plane {
       const decay = Math.exp(-4.2 * dt);
       v.x *= decay; v.y *= decay;
       if (Math.hypot(v.x, v.y) < 6) v.x = v.y = 0;
-    }
-
-    // minimap glide
-    if (this._glide) {
-      const g = this._glide, d = damp(12, dt);
-      c.x = lerp(c.x, g.x, d);
-      c.y = lerp(c.y, g.y, d);
-      if (Math.abs(c.x - g.x) * c.s < 0.3 && Math.abs(c.y - g.y) * c.s < 0.3) { c.x = g.x; c.y = g.y; this._glide = null; }
     }
 
     // smooth zoom (wheel notches, buttons, keys, double tap)
@@ -1464,8 +1396,6 @@ export class Plane {
 
     this._updateCards();
     this._updateEdges();
-    this._drawMinimap();
-    this._updateCoords();
   }
 
   _drawGrid(ctx) {
@@ -1524,8 +1454,8 @@ export class Plane {
     if (spot) {
       const h = this._hover;
       const g = ctx.createRadialGradient(h.sx, h.sy, 0, h.sx, h.sy, 230);
-      g.addColorStop(0, `rgba(140,200,255,${(0.2 * h.glow).toFixed(3)})`);
-      g.addColorStop(0.45, `rgba(140,170,255,${(0.07 * h.glow).toFixed(3)})`);
+      g.addColorStop(0, `rgba(140,200,255,${(0.1 * h.glow).toFixed(3)})`);
+      g.addColorStop(0.45, `rgba(140,170,255,${(0.035 * h.glow).toFixed(3)})`);
       g.addColorStop(1, 'rgba(140,170,255,0)');
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = g;
@@ -1548,9 +1478,6 @@ export class Plane {
     if (xAxisOn) { glowAxis.moveTo(0, ay); glowAxis.lineTo(W - 4, ay); }
     if (yAxisOn) { glowAxis.moveTo(ax, H); glowAxis.lineTo(ax, topSafe + 4); }
     if (xAxisOn || yAxisOn) {
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = 'rgba(160,200,255,0.045)'; ctx.lineWidth = 9; ctx.stroke(glowAxis);
-      ctx.strokeStyle = 'rgba(160,200,255,0.11)'; ctx.lineWidth = 3.4; ctx.stroke(glowAxis);
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = 'rgba(160,200,255,0.55)'; ctx.lineWidth = 1.2; ctx.stroke(glowAxis);
       // arrow heads
@@ -1611,17 +1538,8 @@ export class Plane {
   }
 
   _glowStroke(ctx, path, rgb, scale = 1, coreAlpha = 1) {
-    ctx.globalCompositeOperation = 'lighter';
-    if (LITE) { // two passes instead of four: most of the cost is the wide halo's fill
-      ctx.lineWidth = 7 * scale; ctx.strokeStyle = rgba(rgb, 0.11 * coreAlpha); ctx.stroke(path);
-      ctx.lineWidth = 2 * scale; ctx.strokeStyle = rgba(rgb, 0.95 * coreAlpha); ctx.stroke(path);
-      return;
-    }
-    ctx.lineWidth = 11 * scale; ctx.strokeStyle = rgba(rgb, 0.055 * coreAlpha); ctx.stroke(path);
-    ctx.lineWidth = 4.6 * scale; ctx.strokeStyle = rgba(rgb, 0.17 * coreAlpha); ctx.stroke(path);
-    ctx.lineWidth = 2 * scale; ctx.strokeStyle = rgba(rgb, 0.95 * coreAlpha); ctx.stroke(path);
-    ctx.lineWidth = 0.8 * scale; ctx.strokeStyle = rgba(tint(rgb, 0.7), 0.55 * coreAlpha); ctx.stroke(path);
-    ctx.globalCompositeOperation = 'source-over';
+    if (!LITE) { ctx.lineWidth = 4 * scale; ctx.strokeStyle = rgba(rgb, 0.08 * coreAlpha); ctx.stroke(path); }
+    ctx.lineWidth = 2 * scale; ctx.strokeStyle = rgba(rgb, 0.9 * coreAlpha); ctx.stroke(path);
   }
 
   _drawCurves(ctx) {
@@ -1634,7 +1552,7 @@ export class Plane {
     for (const o of curves) {
       const hit = this._curveCached(o, budget);
       if (!hit.path) continue;
-      const rgb = this._col(o.color || '#3df5ff');
+      const rgb = this._col(o.color || '#5ed6e0');
       if (hit.band) {
         ctx.fillStyle = rgba(rgb, 0.16 * (o.alpha ?? 1));
         ctx.fill(hit.band);
@@ -1800,7 +1718,7 @@ export class Plane {
       if (o.kind !== 'point' || o.visible === false || !Number.isFinite(o.x) || !Number.isFinite(o.y)) continue;
       const p = this.worldToScreen(o.x, o.y);
       if (p.x < -40 || p.x > this.W + 40 || p.y < -40 || p.y > this.H + 40) continue;
-      const rgb = this._col(o.color || '#ff3df2');
+      const rgb = this._col(o.color || '#e06bd6');
       ctx.globalCompositeOperation = 'lighter';
       for (const [r, a] of [[15, 0.06], [9, 0.14], [5.5, 0.35]]) {
         ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fillStyle = rgba(rgb, a); ctx.fill();
@@ -1895,14 +1813,10 @@ export class Plane {
         g.addColorStop(1, rgba(cb, alpha));
         return g;
       };
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.lineWidth = 9; ctx.strokeStyle = mk(0.04); ctx.stroke(path);
       ctx.setLineDash([7, 11]);
       ctx.lineDashOffset = dashPhase + screenAcc;
-      ctx.lineWidth = 3.6; ctx.strokeStyle = mk(0.16); ctx.stroke(path);
-      ctx.lineWidth = 1.5; ctx.strokeStyle = mk(0.75); ctx.stroke(path);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = mk(0.6); ctx.stroke(path);
       ctx.setLineDash([]);
-      ctx.globalCompositeOperation = 'source-over';
       screenAcc += segScreen;
     }
 
@@ -1917,10 +1831,6 @@ export class Plane {
         const rgb = this._col(this._mixHex(p.seg.from.color, p.seg.to.color, p.u));
         const fade = 1 - i / 15;
         const r = i === 0 ? 3 : 2.4 * fade + 0.4;
-        if (i === 0) {
-          ctx.beginPath(); ctx.arc(q.x, q.y, 11, 0, TAU); ctx.fillStyle = rgba(rgb, 0.1); ctx.fill();
-          ctx.beginPath(); ctx.arc(q.x, q.y, 5.5, 0, TAU); ctx.fillStyle = rgba(rgb, 0.3); ctx.fill();
-        }
         ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, TAU); ctx.fillStyle = rgba(i === 0 ? tint(rgb, 0.6) : rgb, 0.85 * fade); ctx.fill();
       }
       ctx.globalCompositeOperation = 'source-over';
@@ -1977,8 +1887,6 @@ export class Plane {
       ctx.translate(0, dy);
       ctx.scale(sc, sc);
       const pin = this._pinPath;
-      ctx.lineWidth = 9; ctx.strokeStyle = rgba(rgb, 0.07); ctx.stroke(pin);
-      ctx.lineWidth = 4; ctx.strokeStyle = rgba(rgb, 0.2 + 0.15 * st.hover); ctx.stroke(pin);
       ctx.globalCompositeOperation = 'source-over';
       const grad = ctx.createLinearGradient(0, -PIN_D - PIN_R, 0, 0);
       grad.addColorStop(0, rgba(tint(rgb, 0.45), 1));
@@ -2003,11 +1911,6 @@ export class Plane {
       ctx.lineWidth = 4;
       ctx.strokeStyle = 'rgba(5,6,10,0.75)';
       ctx.strokeText(p.label, sp.x, ly);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = rgba(rgb, 0.12 + 0.12 * st.hover);
-      ctx.strokeText(p.label, sp.x, ly);
-      ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = rgba(tint(rgb, 0.35 + 0.3 * st.hover), 0.95);
       ctx.fillText(p.label, sp.x, ly);
       ctx.restore();
@@ -2192,126 +2095,9 @@ export class Plane {
       const ang = Math.atan2(tipY - y, sp.x - x);
       const rot = `rotate(${ang.toFixed(3)}rad)`;
       if (rot !== e.rot) { e.icon.style.transform = rot; e.rot = rot; }
-      const dist = Math.hypot(p.x - this.camera.x, p.y - this.camera.y);
-      const d = `${dist < 10 ? dist.toFixed(1) : Math.round(dist)}u`;
-      if (d !== e.d) { e.dist.textContent = d; e.d = d; }
     }
   }
 
-  /* ---------- minimap ---------- */
-
-  _minimapMap() {
-    const w = this._mmW, h = this._mmH;
-    if (!w || !h) return null;
-    const b = this.bounds;
-    const bw = b.maxX - b.minX, bh = b.maxY - b.minY;
-    const pad = 6;
-    const k = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh);
-    return { k, ox: (w - bw * k) / 2, oy: (h - bh * k) / 2, w, h };
-  }
-
-  _drawMinimap() {
-    const ctx = this.mctx;
-    if (!ctx) return;
-    const m = this._minimapMap();
-    if (!m) return;
-    const dpr = this.dpr;
-    const b = this.bounds;
-    const X = (x) => m.ox + (x - b.minX) * m.k;
-    const Y = (y) => m.oy + (b.maxY - y) * m.k;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, m.w, m.h);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // grid every 10 units, axes
-    const grid = new Path2D();
-    for (let x = Math.ceil(b.minX / 10) * 10; x <= b.maxX; x += 10) { if (x) { grid.moveTo(X(x), Y(b.maxY)); grid.lineTo(X(x), Y(b.minY)); } }
-    for (let y = Math.ceil(b.minY / 10) * 10; y <= b.maxY; y += 10) { if (y) { grid.moveTo(X(b.minX), Y(y)); grid.lineTo(X(b.maxX), Y(y)); } }
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(120,150,255,0.08)';
-    ctx.stroke(grid);
-    ctx.beginPath();
-    ctx.moveTo(X(b.minX), Y(0)); ctx.lineTo(X(b.maxX), Y(0));
-    ctx.moveTo(X(0), Y(b.minY)); ctx.lineTo(X(0), Y(b.maxY));
-    ctx.strokeStyle = 'rgba(160,200,255,0.28)';
-    ctx.stroke();
-
-    // route
-    if (this.routeVisible) {
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.setLineDash([2, 3]);
-      ctx.lineDashOffset = this.reducedMotion ? 0 : -this.clock * 6;
-      for (const seg of this._route) {
-        ctx.beginPath();
-        seg.pts.forEach((q, i) => (i ? ctx.lineTo(X(q.x), Y(q.y)) : ctx.moveTo(X(q.x), Y(q.y))));
-        const g = ctx.createLinearGradient(X(seg.from.x), Y(seg.from.y), X(seg.to.x), Y(seg.to.y));
-        g.addColorStop(0, rgba(this._col(seg.from.color), 0.55));
-        g.addColorStop(1, rgba(this._col(seg.to.color), 0.55));
-        ctx.strokeStyle = g;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      ctx.setLineDash([]);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-
-    // viewport
-    const { W, H } = this;
-    const { x: cx, y: cy, s } = this.camera;
-    const vx0 = X(cx - W / 2 / s), vx1 = X(cx + W / 2 / s), vy0 = Y(cy + H / 2 / s), vy1 = Y(cy - H / 2 / s);
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0.5, 0.5, m.w - 1, m.h - 1); ctx.clip();
-    ctx.fillStyle = 'rgba(61,245,255,0.07)';
-    ctx.fillRect(vx0, vy0, vx1 - vx0, vy1 - vy0);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.strokeStyle = 'rgba(61,245,255,0.18)';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(vx0, vy0, vx1 - vx0, vy1 - vy0);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = 'rgba(61,245,255,0.85)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(Math.round(vx0) + 0.5, Math.round(vy0) + 0.5, Math.round(vx1 - vx0), Math.round(vy1 - vy0));
-    ctx.restore();
-
-    // pins
-    for (const [i, p] of this.places.entries()) {
-      const x = X(p.x), y = Y(p.y);
-      const rgb = this._col(p.color);
-      ctx.globalCompositeOperation = 'lighter';
-      const pulse = this.reducedMotion ? 0.5 : 0.5 + 0.5 * Math.sin(this.clock * 2.4 + i);
-      ctx.beginPath(); ctx.arc(x, y, 6 + pulse * 2, 0, TAU); ctx.fillStyle = rgba(rgb, 0.1); ctx.fill();
-      ctx.beginPath(); ctx.arc(x, y, 3.6, 0, TAU); ctx.fillStyle = rgba(rgb, 0.3); ctx.fill();
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, TAU); ctx.fillStyle = rgba(tint(rgb, 0.25), 1); ctx.fill();
-    }
-
-    // you are here (if the camera wandered off the map, an arrow at the border says so)
-    const hx = X(cx), hy = Y(cy);
-    if (hx < 0 || hx > m.w || hy < 0 || hy > m.h) {
-      const ex = clamp(hx, 5, m.w - 5), ey = clamp(hy, 5, m.h - 5);
-      const a = Math.atan2(hy - ey, hx - ex);
-      ctx.save();
-      ctx.translate(ex, ey); ctx.rotate(a);
-      ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(-3, -3.5); ctx.lineTo(-3, 3.5); ctx.closePath();
-      ctx.fillStyle = 'rgba(61,245,255,0.95)';
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  _updateCoords() {
-    const el = this.coordsEl;
-    if (!el || this._frame % 3) return;
-    const w = this._hover.on ? this.screenToWorld(this._hover.sx, this._hover.sy) : this.camera;
-    const f = (v) => {
-      const s = (Math.abs(v) < 0.005 ? 0 : v).toFixed(2);
-      return s.replace('-', '−');
-    };
-    const txt = `(${f(w.x)}, ${f(w.y)})`;
-    if (txt !== this._coordsText) { el.textContent = txt; this._coordsText = txt; }
-  }
 }
 
 export default Plane;

@@ -43,7 +43,7 @@
 
   <noscript>
     <style>
-      #plane, #aurora, #vignette, #world, #hud-top, #algebra, #hud-br, #edge-arrows, #toasts, #vim-bar, #flash, .skip-link { display: none !important; }
+      #plane, #vignette, #world, #hud-top, #algebra, #hud-br, #edge-arrows, #toasts, #vim-bar, #flash, .skip-link { display: none !important; }
       body { overflow: auto; }
     </style>
   </noscript>
@@ -63,11 +63,11 @@
       <span class="brand-word">codected</span>
     </button>
     <nav id="places" aria-label="Places">
-      <button class="place-btn" type="button" data-place="hello" style="--c: #3df5ff"><span class="place-dot" aria-hidden="true"></span>Hello<kbd aria-hidden="true">1</kbd></button>
-      <button class="place-btn" type="button" data-place="geogebra" style="--c: #8a7dff"><span class="place-dot" aria-hidden="true"></span>GeoGebra<kbd aria-hidden="true">2</kbd></button>
-      <button class="place-btn" type="button" data-place="mapplic" style="--c: #ff3df2"><span class="place-dot" aria-hidden="true"></span>Mapplic<kbd aria-hidden="true">3</kbd></button>
-      <button class="place-btn" type="button" data-place="stack" style="--c: #b6ff3d"><span class="place-dot" aria-hidden="true"></span>Stack<kbd aria-hidden="true">4</kbd></button>
-      <button class="place-btn" type="button" data-place="contact" style="--c: #ffb23d"><span class="place-dot" aria-hidden="true"></span>Contact<kbd aria-hidden="true">5</kbd></button>
+      <button class="place-btn" type="button" data-place="hello" style="--c: #5ed6e0"><span class="place-dot" aria-hidden="true"></span>Hello<kbd aria-hidden="true">1</kbd></button>
+      <button class="place-btn" type="button" data-place="geogebra" style="--c: #8f86e8"><span class="place-dot" aria-hidden="true"></span>GeoGebra<kbd aria-hidden="true">2</kbd></button>
+      <button class="place-btn" type="button" data-place="mapplic" style="--c: #e06bd6"><span class="place-dot" aria-hidden="true"></span>Mapplic<kbd aria-hidden="true">3</kbd></button>
+      <button class="place-btn" type="button" data-place="stack" style="--c: #a8d860"><span class="place-dot" aria-hidden="true"></span>Stack<kbd aria-hidden="true">4</kbd></button>
+      <button class="place-btn" type="button" data-place="contact" style="--c: #f0b056"><span class="place-dot" aria-hidden="true"></span>Contact<kbd aria-hidden="true">5</kbd></button>
     </nav>
     <button id="boring-toggle" type="button" aria-pressed="false" aria-controls="boring">
       <span class="switch" aria-hidden="true"><span class="switch-knob"></span></span>
@@ -77,19 +77,17 @@
 
   <!-- ===== the plane ===== -->
   <canvas id="plane" aria-hidden="true"></canvas>
-  <div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
   <div id="vignette" aria-hidden="true"></div>
 
   <main id="world" aria-label="The plane">
     <!-- Hello · (0, 0) -->
-    <article class="card card--hello" data-place="hello" id="card-hello" aria-labelledby="title-hello" style="--pc: #3df5ff">
+    <article class="card card--hello" data-place="hello" id="card-hello" aria-labelledby="title-hello" style="--pc: #5ed6e0">
       <div class="card-inner">
         <div class="card-top">
           <picture class="portrait">
             <source srcset="/assets/img/balazs.webp" type="image/webp">
             <img src="/assets/img/balazs.jpg" alt="Balázs Bencze" width="560" height="560" decoding="async">
           </picture>
-          <p class="coord" aria-hidden="true"><span class="coord-name">O</span> = (0, 0)</p>
         </div>
         <h1 class="wordmark" id="title-hello"><span class="wordmark-text" data-text="codected">codected</span></h1>
         <p class="lead">Balázs Bencze — I write software. Mobile, web, backend, the whole stack. If it compiles, I speak it.</p>
@@ -105,12 +103,8 @@
     </article>
 
     <!-- GeoGebra · (22, 9) -->
-    <article class="card card--geogebra" data-place="geogebra" id="card-geogebra" aria-labelledby="title-geogebra" style="--pc: #8a7dff">
+    <article class="card card--geogebra" data-place="geogebra" id="card-geogebra" aria-labelledby="title-geogebra" style="--pc: #8f86e8">
       <div class="card-inner">
-        <div class="card-top">
-          <p class="now"><span class="live-dot" aria-hidden="true"></span>now building</p>
-          <p class="coord" aria-hidden="true"><span class="coord-name">G</span> = (22, 9)</p>
-        </div>
         <h2 class="card-title" id="title-geogebra">GeoGebra</h2>
         <figure class="shot">
           <picture>
@@ -128,17 +122,13 @@
     </article>
 
     <!-- Mapplic · (−21, −11) -->
-    <article class="card card--mapplic" data-place="mapplic" id="card-mapplic" aria-labelledby="title-mapplic" style="--pc: #ff3df2">
+    <article class="card card--mapplic" data-place="mapplic" id="card-mapplic" aria-labelledby="title-mapplic" style="--pc: #e06bd6">
       <div class="card-inner">
-        <div class="card-top">
-          <p class="now"><span class="live-dot" aria-hidden="true"></span>working on</p>
-          <p class="coord" aria-hidden="true"><span class="coord-name">M</span> = (−21, −11)</p>
-        </div>
         <h2 class="card-title" id="title-mapplic">Mapplic</h2>
         <figure class="shot shot--map">
           <img src="/assets/img/mapplic-map.svg" alt="An animated floor plan with glowing map pins dropping into rooms" width="640" height="400" loading="lazy" decoding="async">
         </figure>
-        <p>Interactive maps from images and SVGs — floor plans, campuses, malls, anything that needs pins.</p>
+        <p>I work on Mapplic: interactive maps from images and SVGs — floor plans, campuses, malls, anything that needs pins.</p>
         <p class="aside">(those pins you’ve been clicking? also a tribute)</p>
         <div class="card-actions">
           <a class="link-out" href="https://mapplic.com" target="_blank" rel="noopener">mapplic.com <span aria-hidden="true">↗</span></a>
@@ -148,27 +138,23 @@
     </article>
 
     <!-- Stack · (−17, 13) -->
-    <article class="card card--stack" data-place="stack" id="card-stack" aria-labelledby="title-stack" style="--pc: #b6ff3d">
+    <article class="card card--stack" data-place="stack" id="card-stack" aria-labelledby="title-stack" style="--pc: #a8d860">
       <div class="card-inner">
-        <div class="card-top">
-          <p class="now now--plain">import * as everything</p>
-          <p class="coord" aria-hidden="true"><span class="coord-name">S</span> = (−17, 13)</p>
-        </div>
         <h2 class="card-title" id="title-stack">Stack</h2>
         <p class="stack-lead">Pick a language. Any language. I’ve probably shipped it.</p>
         <ul class="chips" aria-label="Languages and tools">
-          <li><button class="chip chip--btn" type="button" style="--c: #b6ff3d" data-run="kotlin">Kotlin</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #ffb23d" data-run="swift">Swift</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #3df5ff" data-run="flutter" title="careful">Dart / Flutter</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #8a7dff" data-run="typescript">TypeScript</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #ff4d6d" data-run="java">Java</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #ff3df2" data-run="objc">Objective-C</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #3df5ff" data-run="javascript">JavaScript</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #b6ff3d" data-run="python">Python</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #ffb23d" data-run="sql">SQL</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #8a7dff" data-run="backend">Backend &amp; APIs</button></li>
-          <li><button class="chip chip--btn" type="button" style="--c: #ff3df2" data-run="anything" aria-label="anything else">…∞</button></li>
-          <li><button class="chip chip--btn chip--coffee" type="button" style="--c: #ffb23d" data-run="coffee" aria-label="coffee (brews one)"><span aria-hidden="true">☕</span> coffee</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #a8d860" data-run="kotlin">Kotlin</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #f0b056" data-run="swift">Swift</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #5ed6e0" data-run="flutter" title="careful">Dart / Flutter</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #8f86e8" data-run="typescript">TypeScript</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #ee6a80" data-run="java">Java</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #e06bd6" data-run="objc">Objective-C</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #5ed6e0" data-run="javascript">JavaScript</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #a8d860" data-run="python">Python</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #f0b056" data-run="sql">SQL</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #8f86e8" data-run="backend">Backend &amp; APIs</button></li>
+          <li><button class="chip chip--btn" type="button" style="--c: #e06bd6" data-run="anything" aria-label="anything else">…∞</button></li>
+          <li><button class="chip chip--btn chip--coffee" type="button" style="--c: #f0b056" data-run="coffee" aria-label="coffee (brews one)"><span aria-hidden="true">☕</span> coffee</button></li>
         </ul>
         <p>Native apps, web apps, servers, tooling, the weird legacy thing nobody dares to touch. Codected Solutions SRL is small on purpose: you talk directly to the person writing the code. Based in Romania.</p>
         <div class="card-actions">
@@ -178,12 +164,8 @@
     </article>
 
     <!-- Contact · (9, −19) -->
-    <article class="card card--contact" data-place="contact" id="card-contact" aria-labelledby="title-contact" style="--pc: #ffb23d">
+    <article class="card card--contact" data-place="contact" id="card-contact" aria-labelledby="title-contact" style="--pc: #f0b056">
       <div class="card-inner">
-        <div class="card-top">
-          <p class="now now--plain">$ ./contact.sh</p>
-          <p class="coord" aria-hidden="true"><span class="coord-name">C</span> = (9, −19)</p>
-        </div>
         <h2 class="card-title" id="title-contact">Contact</h2>
         <p>Got software that needs building, fixing, or un-crashing? Write me.</p>
         <a class="mailto" id="mailto" href="mailto:balazs@codected.com"><span class="mailto-at" aria-hidden="true">@</span><span class="mailto-text">balazs@codected.com</span></a>
@@ -217,17 +199,10 @@
   </aside>
 
   <div id="hud-br">
-    <div class="minimap-frame">
-      <canvas id="minimap" aria-hidden="true"></canvas>
-      <span class="minimap-label" aria-hidden="true">map</span>
-    </div>
-    <div class="hud-br-row">
-      <span id="coords" aria-hidden="true">(0.00, 0.00)</span>
-      <div class="zoom" role="group" aria-label="Zoom">
-        <button id="zoom-in" type="button" aria-label="Zoom in"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" /></svg></button>
-        <button id="zoom-out" type="button" aria-label="Zoom out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg></button>
-        <button id="zoom-home" type="button" aria-label="Back to the origin"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.2" /><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" /></svg></button>
-      </div>
+    <div class="zoom" role="group" aria-label="Zoom">
+      <button id="zoom-in" type="button" aria-label="Zoom in"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" /></svg></button>
+      <button id="zoom-out" type="button" aria-label="Zoom out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg></button>
+      <button id="zoom-home" type="button" aria-label="Back to the origin"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.2" /><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" /></svg></button>
     </div>
   </div>
 

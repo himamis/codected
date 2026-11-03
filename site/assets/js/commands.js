@@ -7,7 +7,7 @@ const $ = (sel) => (HAS_DOM ? document.querySelector(sel) : null);
 const bodyClass = (name, on) => { if (HAS_DOM && document.body) document.body.classList.toggle(name, on); };
 
 const PLACE_FILES = { hello: 'hello.md', geogebra: 'geogebra/', mapplic: 'mapplic/', stack: 'stack.txt', contact: 'contact.sh' };
-const COLORS = { hello: '#3df5ff', geogebra: '#8a7dff', mapplic: '#ff3df2', stack: '#b6ff3d', contact: '#ffb23d' };
+const COLORS = { hello: '#5ed6e0', geogebra: '#8f86e8', mapplic: '#e06bd6', stack: '#a8d860', contact: '#f0b056' };
 const VIM_EXITS = new Set([':q', ':q!', ':wq', ':wq!', ':x', ':x!', 'zz', ':qa', ':qa!', ':wqa']);
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -375,7 +375,7 @@ export function createCommands(ctx) {
   def(['duck', 'rubber duck', 'quack'], () => toast('Quack. Now explain the bug to me slowly.'));
   def(['why', 'why?'], () => toast('Because GeoGebra and Mapplic deserved a tribute. And because I could.'));
   def(['neofetch', 'uname', 'uname -a', 'fastfetch'], () => toast(
-    `<code><b style="color:#3df5ff">guest@codected</b><br>OS: The Plane (ℝ²)<br>Shell: GeoGebra-ish<br>Deps: 0<br>Uptime: since you arrived<br>Theme: glowing (only option)</code>`,
+    `<code><b style="color:#5ed6e0">guest@codected</b><br>OS: The Plane (ℝ²)<br>Shell: GeoGebra-ish<br>Deps: 0<br>Uptime: since you arrived<br>Theme: glowing (only option)</code>`,
     { html: true, kind: 'info', ms: 7000 },
   ));
 
