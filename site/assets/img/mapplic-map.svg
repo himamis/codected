@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-labelledby="t d">
+  <title id="t">Mapplic-style interactive floor plan with glowing pins</title>
+  <desc id="d">A neon office floor plan: dev room, standup, coffee, prod servers, a meeting room that could have been an email, and Room 404, which is not found. Pins drop in and pulse; a dashed route leads from "You are here (probably)" to Room 404.</desc>
+  <style>
+    .bg { fill: #070910; }
+    .grid { stroke: rgba(120,150,255,.07); stroke-width: 1; }
+    .walls path, .ghost path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .w-wide { stroke: #3df5ff; stroke-opacity: .07; stroke-width: 9; }
+    .w-mid  { stroke: #3df5ff; stroke-opacity: .2;  stroke-width: 3.5; }
+    .w-line { stroke: #9ff9ff; stroke-opacity: .9;  stroke-width: 1.3; }
+    .outer-wide { fill: none; stroke: #8a7dff; stroke-opacity: .08; stroke-width: 12; }
+    .outer { fill: rgba(14,17,30,.55); stroke: #8a7dff; stroke-opacity: .55; stroke-width: 1.4; }
+    .ghost path { stroke: #ff3df2; stroke-width: 1.3; stroke-dasharray: 5 6; stroke-opacity: .75; }
+    .ghost .g-line { animation: ghost 3.2s ease-in-out infinite; }
+    .ghost .g-wide { stroke-width: 6; stroke-opacity: .06; stroke-dasharray: 5 6; }
+    .corridor { stroke: rgba(160,200,255,.14); stroke-width: 1; stroke-dasharray: 2 7; fill: none; }
+    .lbl { font: 600 14px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .06em; fill: #7c86ad; }
+    .lbl-404 { fill: #ff3df2; fill-opacity: .7; }
+    .qmark { font: 800 64px/1 "Bricolage Grotesque", ui-rounded, system-ui, sans-serif; fill: #ff3df2; fill-opacity: .12; text-anchor: middle; }
+    .f { fill: none; stroke-width: 1.1; stroke-opacity: .55; }
+    .thin { stroke-width: .8; stroke-opacity: .35; }
+    .f-v { stroke: #8a7dff; } .f-c { stroke: #3df5ff; } .f-a { stroke: #ffb23d; }
+    .f-l { stroke: #b6ff3d; } .f-r { stroke: #ff4d6d; } .f-m { stroke: #8a7dff; }
+    .mon { stroke-width: 2; stroke-opacity: .9; animation: blink 2.6s steps(2, jump-none) infinite; }
+    .escape { animation: escape 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    .led { stroke: none; animation: blink 1.4s steps(2, jump-none) infinite; }
+    .led-l { fill: #b6ff3d; } .led-r { fill: #ff4d6d; } .led-a { fill: #ffb23d; }
+    .steam { fill: none; stroke: #ffb23d; stroke-width: 1.2; stroke-linecap: round; opacity: 0; animation: steam 2.4s ease-out infinite; }
+    .route-wide { fill: none; stroke: #ff3df2; stroke-opacity: .12; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+    .route { fill: none; stroke: #ff7af6; stroke-width: 2; stroke-dasharray: 7 7; stroke-linecap: round; stroke-linejoin: round; animation: flow 1.1s linear infinite; }
+    .comet { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 3 97; stroke-dashoffset: 100; animation: comet 3.4s cubic-bezier(.45,0,.55,1) infinite; animation-delay: 1.6s; opacity: .95; }
+    .ring { fill: none; stroke: var(--c); stroke-width: 1.4; opacity: 0; transform-box: fill-box; transform-origin: center; animation: ring 2.4s ease-out infinite; }
+    .shadow { fill: var(--c); opacity: .35; transform-box: fill-box; transform-origin: center; animation: shadow .9s cubic-bezier(.3,1.4,.5,1) both; }
+    .drop { animation: drop .9s cubic-bezier(.3,1.4,.5,1) both; }
+    .bob-on { animation: bob 2.8s ease-in-out infinite; animation-delay: 1.5s; }
+    .pin-glow { fill: none; stroke: var(--c); stroke-opacity: .22; stroke-width: 7; }
+    .pin { fill: var(--c); stroke: #fff; stroke-opacity: .55; stroke-width: 1; }
+    .pin-hole { fill: #070910; }
+    .pin-shine { fill: none; stroke: #fff; stroke-opacity: .6; stroke-width: 1.4; stroke-linecap: round; }
+    .tip { transform-box: fill-box; transform-origin: 50% 100%; }
+    .tip-glow { fill: none; stroke: var(--c); stroke-opacity: .16; stroke-width: 8; stroke-linejoin: round; }
+    .tip-bg { fill: rgba(11,13,22,.92); stroke: var(--c); stroke-width: 1.3; stroke-linejoin: round; }
+    .tip-text { font: 700 15px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-anchor: middle; }
+    .tip-title { fill: #e9ecff; }
+    .tip-sub { fill: #9aa3c7; font-weight: 500; }
+    .tip-a { opacity: 1; animation: tip 12s ease-in-out infinite; animation-delay: 1.4s; }
+    .tip-b { opacity: 0; animation: tip 12s ease-in-out infinite; animation-delay: 7.4s; animation-fill-mode: backwards; }
+    .tip-a { animation-fill-mode: backwards; }
+    .sweep { animation: sweep 8s linear infinite; mix-blend-mode: screen; }
+    .foot { font: 500 12px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #7c86ad; letter-spacing: .06em; }
+    .compass path { fill: none; stroke: #9aa3c7; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+    .compass text { font: 700 9px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; fill: #9aa3c7; text-anchor: middle; }
+
+    @keyframes drop { 0% { transform: translateY(-80px); opacity: 0; } 55% { transform: translateY(0); opacity: 1; } 75% { transform: translateY(-7px); } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes shadow { 0% { transform: scale(.2); opacity: 0; } 55% { transform: scale(1.2); opacity: .45; } 100% { transform: scale(1); opacity: .35; } }
+    @keyframes ring { 0% { transform: scale(.4); opacity: .95; } 100% { transform: scale(2.6); opacity: 0; } }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes flow { to { stroke-dashoffset: -28; } }
+    @keyframes comet { 0% { stroke-dashoffset: 100; opacity: 0; } 8% { opacity: 1; } 85% { opacity: 1; } 100% { stroke-dashoffset: 3; opacity: 0; } }
+    @keyframes tip { 0% { opacity: 0; transform: translateY(6px) scale(.8); } 4% { opacity: 1; transform: none; } 44% { opacity: 1; transform: none; } 48%, 100% { opacity: 0; transform: translateY(4px) scale(.92); } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: .7; } 100% { opacity: 0; transform: translateY(-10px); } }
+    @keyframes ghost { 0%, 100% { stroke-opacity: .75; } 50% { stroke-opacity: .25; } }
+    @keyframes escape { 0%, 70%, 100% { transform: translate(0, 0); } 80% { transform: translate(5px, -3px); } 90% { transform: translate(2px, 1px); } }
+    @keyframes sweep { 0% { transform: translateX(-180px); } 100% { transform: translateX(700px); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; }
+      .tip-a { opacity: 1; } .tip-b { opacity: 0; }
+      .ring { opacity: 0; } .steam { opacity: .5; } .comet { opacity: 0; }
+    }
+  </style>
+  <defs>
+    <pattern id="gridp" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" class="grid"/>
+    </pattern>
+    <radialGradient id="vig" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#11183a" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#070910" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sweepg" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#3df5ff" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#3df5ff" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#3df5ff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="bld"><rect x="30" y="30" width="580" height="340" rx="22"/></clipPath>
+    <g id="walls">
+      <path d="M131 170H176Q186 170 186 160V56Q186 46 176 46H56Q46 46 46 56V160Q46 170 56 170H101"/>
+      <path d="M284 170H334Q344 170 344 160V56Q344 46 334 46H204Q194 46 194 56V160Q194 170 204 170H254"/>
+      <path d="M547 170H584Q594 170 594 160V56Q594 46 584 46H480Q470 46 470 56V160Q470 170 480 170H517"/>
+      <path d="M126 230H56Q46 230 46 240V344Q46 354 56 354H226Q236 354 236 344V240Q236 230 226 230H156"/>
+      <path d="M314 230H254Q244 230 244 240V344Q244 354 254 354H404Q414 354 414 344V240Q414 230 404 230H344"/>
+      <path d="M493 230H432Q422 230 422 240V344Q422 354 432 354H584Q594 354 594 344V240Q594 230 584 230H523"/>
+    </g>
+  </defs>
+
+  <rect class="bg" width="640" height="400" rx="20"/>
+  <rect width="640" height="400" rx="20" fill="url(#gridp)"/>
+  <rect width="640" height="400" rx="20" fill="url(#vig)"/>
+
+  <!-- building -->
+  <rect x="30" y="30" width="580" height="340" rx="22" class="outer-wide"/>
+  <rect x="30" y="30" width="580" height="340" rx="22" class="outer"/>
+  <path d="M46 200H594" class="corridor"/>
+
+  <g class="walls">
+    <use href="#walls" class="w-wide"/>
+    <use href="#walls" class="w-mid"/>
+    <use href="#walls" class="w-line"/>
+  </g>
+  <g class="ghost">
+    <path class="g-wide" d="M422 170H452Q462 170 462 160V56Q462 46 452 46H362Q352 46 352 56V160Q352 170 362 170H392"/>
+    <path class="g-line" d="M422 170H452Q462 170 462 160V56Q462 46 452 46H362Q352 46 352 56V160Q352 170 362 170H392"/>
+  </g>
+
+  <g class="furniture">
+    <rect x="60" y="92" width="30" height="16" rx="3" class="f f-v"/>
+    <path d="M68 97h14" class="f f-v mon" style="animation-delay:0s"/>
+    <circle cx="75" cy="120" r="5" class="f f-v"/>
+    <rect x="100" y="92" width="30" height="16" rx="3" class="f f-v"/>
+    <path d="M108 97h14" class="f f-v mon" style="animation-delay:0.7s"/>
+    <circle cx="115" cy="120" r="5" class="f f-v"/>
+    <rect x="140" y="92" width="30" height="16" rx="3" class="f f-v"/>
+    <path d="M148 97h14" class="f f-v mon" style="animation-delay:1.4s"/>
+    <circle cx="155" cy="120" r="5" class="f f-v"/>
+    <circle cx="269" cy="112" r="24" class="f f-c"/>
+    <circle cx="269" cy="84.12" r="5" class="f f-c"/>
+    <circle cx="295.58" cy="94.62" r="5" class="f f-c"/>
+    <circle cx="313.85" cy="120.39" r="5" class="f f-c escape"/>
+    <circle cx="283.75" cy="137.12" r="5" class="f f-c"/>
+    <circle cx="254.25" cy="137.12" r="5" class="f f-c"/>
+    <circle cx="235.85" cy="118.2" r="5" class="f f-c"/>
+    <circle cx="242.42" cy="94.62" r="5" class="f f-c"/>
+    <text x="407" y="128" class="qmark">?</text>
+    <rect x="482" y="74" width="100" height="16" rx="4" class="f f-a"/>
+    <rect x="560" y="96" width="22" height="30" rx="4" class="f f-a"/>
+    <circle cx="571" cy="106" r="3" class="led led-a"/>
+    <circle cx="496" cy="82" r="4.5" class="f f-a"/>
+    <path d="M496 70q-3 -4 0 -8t0 -8" class="steam" style="animation-delay:0s"/>
+    <circle cx="514" cy="82" r="4.5" class="f f-a"/>
+    <path d="M514 70q-3 -4 0 -8t0 -8" class="steam" style="animation-delay:0.6s"/>
+    <circle cx="532" cy="82" r="4.5" class="f f-a"/>
+    <path d="M532 70q-3 -4 0 -8t0 -8" class="steam" style="animation-delay:1.2s"/>
+    <circle cx="66" cy="334" r="7" class="f f-l"/><circle cx="66" cy="334" r="3" class="f f-l"/>
+    <circle cx="216" cy="334" r="7" class="f f-l"/><circle cx="216" cy="334" r="3" class="f f-l"/>
+    <rect x="170" y="262" width="50" height="14" rx="5" class="f f-c"/>
+    <path d="M62 266v30" class="f f-c thin"/>
+    <path d="M70 266v30" class="f f-c thin"/>
+    <path d="M78 266v30" class="f f-c thin"/>
+    <path d="M86 266v30" class="f f-c thin"/>
+    <path d="M94 266v30" class="f f-c thin"/>
+    <rect x="262" y="262" width="24" height="62" rx="3" class="f f-r"/>
+    <circle cx="269" cy="272" r="1.8" class="led led-l" style="animation-delay:0s"/>
+    <path d="M274 272h7" class="f f-r thin"/>
+    <circle cx="269" cy="285" r="1.8" class="led led-l" style="animation-delay:0.51s"/>
+    <path d="M274 285h7" class="f f-r thin"/>
+    <circle cx="269" cy="298" r="1.8" class="led led-l" style="animation-delay:1.02s"/>
+    <path d="M274 298h7" class="f f-r thin"/>
+    <circle cx="269" cy="311" r="1.8" class="led led-r" style="animation-delay:1.53s"/>
+    <path d="M274 311h7" class="f f-r thin"/>
+    <rect x="298" y="262" width="24" height="62" rx="3" class="f f-r"/>
+    <circle cx="305" cy="272" r="1.8" class="led led-l" style="animation-delay:1.19s"/>
+    <path d="M310 272h7" class="f f-r thin"/>
+    <circle cx="305" cy="285" r="1.8" class="led led-l" style="animation-delay:0s"/>
+    <path d="M310 285h7" class="f f-r thin"/>
+    <circle cx="305" cy="298" r="1.8" class="led led-l" style="animation-delay:0.51s"/>
+    <path d="M310 298h7" class="f f-r thin"/>
+    <circle cx="305" cy="311" r="1.8" class="led led-l" style="animation-delay:1.02s"/>
+    <path d="M310 311h7" class="f f-r thin"/>
+    <rect x="334" y="262" width="24" height="62" rx="3" class="f f-r"/>
+    <circle cx="341" cy="272" r="1.8" class="led led-r" style="animation-delay:0.68s"/>
+    <path d="M346 272h7" class="f f-r thin"/>
+    <circle cx="341" cy="285" r="1.8" class="led led-l" style="animation-delay:1.19s"/>
+    <path d="M346 285h7" class="f f-r thin"/>
+    <circle cx="341" cy="298" r="1.8" class="led led-l" style="animation-delay:0s"/>
+    <path d="M346 298h7" class="f f-r thin"/>
+    <circle cx="341" cy="311" r="1.8" class="led led-l" style="animation-delay:0.51s"/>
+    <path d="M346 311h7" class="f f-r thin"/>
+    <rect x="370" y="262" width="24" height="62" rx="3" class="f f-r"/>
+    <circle cx="377" cy="272" r="1.8" class="led led-l" style="animation-delay:0.17s"/>
+    <path d="M382 272h7" class="f f-r thin"/>
+    <circle cx="377" cy="285" r="1.8" class="led led-r" style="animation-delay:0.68s"/>
+    <path d="M382 285h7" class="f f-r thin"/>
+    <circle cx="377" cy="298" r="1.8" class="led led-l" style="animation-delay:1.19s"/>
+    <path d="M382 298h7" class="f f-r thin"/>
+    <circle cx="377" cy="311" r="1.8" class="led led-l" style="animation-delay:0s"/>
+    <path d="M382 311h7" class="f f-r thin"/>
+    <rect x="452" y="282" width="112" height="28" rx="8" class="f f-m"/>
+    <circle cx="468" cy="272" r="5" class="f f-m"/>
+    <circle cx="468" cy="320" r="5" class="f f-m"/>
+    <circle cx="495" cy="272" r="5" class="f f-m"/>
+    <circle cx="495" cy="320" r="5" class="f f-m"/>
+    <circle cx="522" cy="272" r="5" class="f f-m"/>
+    <circle cx="522" cy="320" r="5" class="f f-m"/>
+    <circle cx="549" cy="272" r="5" class="f f-m"/>
+    <circle cx="549" cy="320" r="5" class="f f-m"/>
+  </g>
+  <g class="labels">
+    <text x="58" y="66" class="lbl">DEV</text>
+    <text x="206" y="66" class="lbl">STANDUP*</text>
+    <text x="364" y="66" class="lbl lbl-404">404</text>
+    <text x="482" y="66" class="lbl">COFFEE</text>
+    <text x="58" y="250" class="lbl">LOBBY</text>
+    <text x="256" y="250" class="lbl">PROD · NO TOUCH</text>
+    <text x="434" y="250" class="lbl">COULD BE EMAIL</text>
+  </g>
+
+  <!-- scanning sweep -->
+  <g clip-path="url(#bld)"><rect class="sweep" x="0" y="30" width="160" height="340" fill="url(#sweepg)"/></g>
+
+  <!-- route: you are here -> room 404 -->
+  <path d="M140 296V262Q140 200 176 200H378Q407 200 407 172V134" class="route-wide"/>
+  <path d="M140 296V262Q140 200 176 200H378Q407 200 407 172V134" class="route"/>
+  <path d="M140 296V262Q140 200 176 200H378Q407 200 407 172V134" class="comet" pathLength="100"/>
+
+  <g class="pins">
+    <g transform="translate(140 302)" style="--c:#3df5ff">
+      <ellipse class="ring" rx="11" ry="4" style="animation-delay:1.05s"/>
+      <ellipse class="shadow" rx="7" ry="2.4" style="animation-delay:0.15s"/>
+      <g class="drop" style="animation-delay:0.15s">
+        <g class="bob">
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin-glow"/>
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin"/>
+          <circle cy="-23" r="4.6" class="pin-hole"/>
+          <path d="M-6 -29a8 8 0 0 1 7 -4" class="pin-shine"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(116 150)" style="--c:#8a7dff">
+      <ellipse class="ring" rx="11" ry="4" style="animation-delay:1.25s"/>
+      <ellipse class="shadow" rx="7" ry="2.4" style="animation-delay:0.35s"/>
+      <g class="drop" style="animation-delay:0.35s">
+        <g class="bob">
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin-glow"/>
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin"/>
+          <circle cy="-23" r="4.6" class="pin-hole"/>
+          <path d="M-6 -29a8 8 0 0 1 7 -4" class="pin-shine"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(407 126)" style="--c:#ff3df2">
+      <ellipse class="ring" rx="11" ry="4" style="animation-delay:1.45s"/>
+      <ellipse class="shadow" rx="7" ry="2.4" style="animation-delay:0.55s"/>
+      <g class="drop" style="animation-delay:0.55s">
+        <g class="bob bob-on">
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin-glow"/>
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin"/>
+          <circle cy="-23" r="4.6" class="pin-hole"/>
+          <path d="M-6 -29a8 8 0 0 1 7 -4" class="pin-shine"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(520 136)" style="--c:#ffb23d">
+      <ellipse class="ring" rx="11" ry="4" style="animation-delay:1.65s"/>
+      <ellipse class="shadow" rx="7" ry="2.4" style="animation-delay:0.75s"/>
+      <g class="drop" style="animation-delay:0.75s">
+        <g class="bob">
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin-glow"/>
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin"/>
+          <circle cy="-23" r="4.6" class="pin-hole"/>
+          <path d="M-6 -29a8 8 0 0 1 7 -4" class="pin-shine"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(329 340)" style="--c:#b6ff3d">
+      <ellipse class="ring" rx="11" ry="4" style="animation-delay:1.85s"/>
+      <ellipse class="shadow" rx="7" ry="2.4" style="animation-delay:0.95s"/>
+      <g class="drop" style="animation-delay:0.95s">
+        <g class="bob">
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin-glow"/>
+          <path d="M0 0C-4 -7 -12 -13 -12 -23A12 12 0 1 1 12 -23C12 -13 4 -7 0 0Z" class="pin"/>
+          <circle cy="-23" r="4.6" class="pin-hole"/>
+          <path d="M-6 -29a8 8 0 0 1 7 -4" class="pin-shine"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <g class="tip tip-b" style="--c:#3df5ff">
+    <path d="M38 206H262Q274 206 274 218V234Q274 246 262 246H159L150 256L141 246H38Q26 246 26 234V218Q26 206 38 206Z" class="tip-glow"/>
+    <path d="M38 206H262Q274 206 274 218V234Q274 246 262 246H159L150 256L141 246H38Q26 246 26 234V218Q26 206 38 206Z" class="tip-bg"/>
+    <text x="150" y="231.5" class="tip-text"><tspan class="tip-title">You are here</tspan><tspan class="tip-sub"> (probably)</tspan></text>
+  </g>
+
+  <g class="tip tip-a" style="--c:#ff3df2">
+    <path d="M347 30H467Q479 30 479 42V58Q479 70 467 70H416L407 80L398 70H347Q335 70 335 58V42Q335 30 347 30Z" class="tip-glow"/>
+    <path d="M347 30H467Q479 30 479 42V58Q479 70 467 70H416L407 80L398 70H347Q335 70 335 58V42Q335 30 347 30Z" class="tip-bg"/>
+    <text x="407" y="55" class="tip-text" style="font-size:13px"><tspan class="tip-title">404</tspan><tspan class="tip-sub"> · not found</tspan></text>
+  </g>
+
+  <text x="34" y="391" class="foot">LEVEL 2 · SCALE 1:1 (TRUST ME)</text>
+  <g class="compass" transform="translate(592 386)">
+    <path d="M0 -4L4 6L0 3.5L-4 6Z"/>
+    <text x="13" y="5">N</text>
+  </g>
+</svg>

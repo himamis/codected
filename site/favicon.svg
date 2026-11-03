@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>codected</title>
+  <defs>
+    <radialGradient id="bg" cx=".5" cy=".42" r=".75">
+      <stop offset="0" stop-color="#151a33"/>
+      <stop offset="1" stop-color="#05060a"/>
+    </radialGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3df5ff"/>
+      <stop offset="1" stop-color="#8a7dff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <path d="M6 32H58M32 6V58" stroke="#a0c8ff" stroke-opacity=".3" stroke-width="1.5" stroke-linecap="round"/>
+  <g fill="none" stroke="url(#ink)" stroke-linecap="round">
+    <path d="M43.4 19.6A17 17 0 1 0 43.4 44.4" stroke-width="12" stroke-opacity=".12"/>
+    <path d="M43.4 19.6A17 17 0 1 0 43.4 44.4" stroke-width="7.5" stroke-opacity=".3"/>
+    <path d="M43.4 19.6A17 17 0 1 0 43.4 44.4" stroke-width="4.5"/>
+  </g>
+  <circle cx="49" cy="32" r="7" fill="#ff3df2" fill-opacity=".22"/>
+  <circle cx="49" cy="32" r="3.6" fill="#ff3df2"/>
+  <circle cx="48.2" cy="31.2" r="1.2" fill="#fff" fill-opacity=".85"/>
+</svg>

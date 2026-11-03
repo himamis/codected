@@ -1,6 +1,17 @@
 {
+  "name": "codected.com",
+  "private": true,
+  "type": "module",
+  "description": "A personal website that is also a graphing calculator. Nobody asked for this.",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "smoke": "node tests/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
-    "@shopify/prettier-plugin-liquid": "1.4.0",
-    "prettier": "3.1.1"
+    "playwright": "^1.64.1"
   }
 }
